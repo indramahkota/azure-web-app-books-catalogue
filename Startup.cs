@@ -47,7 +47,7 @@ namespace BooksCatalogue
                     name: "default",
                     //pattern: "{controller=Books}/{action=Welcome}/{name=Rick}/{numtimes=40}");
                     //pattern: "{controller=Review}/{action=Index}/{id?}");
-                    pattern: "{controller=Books}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=RedisCache}/{id?}");
             });
         }
     }
