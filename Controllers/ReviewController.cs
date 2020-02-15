@@ -1,6 +1,7 @@
 ﻿using BooksCatalogue.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -53,13 +54,14 @@ namespace BooksCatalogue.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddReview([Bind("Id,BookId,ReviewerName,Rating,Comment")] Review tReview)
         {
-            MultipartFormDataContent content = new MultipartFormDataContent
-            {
-                { new StringContent(tReview.BookId.ToString()), "bookId" },
-                { new StringContent(tReview.ReviewerName), "reviewerName" },
-                { new StringContent(tReview.Rating.ToString()), "rating" },
-                { new StringContent(tReview.Comment), "comment" }
-            };
+            var httpContent = new[] {
+                    new KeyValuePair<string, string>("bookId", tReview.BookId.ToString()),
+                    new KeyValuePair<string, string>("reviewerName", tReview.ReviewerName),
+                    new KeyValuePair<string, string>("rating", tReview.Rating.ToString()),
+                    new KeyValuePair<string, string>("comment", tReview.Comment)
+                };
+            
+            HttpContent content = new FormUrlEncodedContent(httpContent);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, apiEndpoint + "reviews")
             {

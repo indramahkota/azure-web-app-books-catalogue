@@ -16,8 +16,9 @@ namespace BooksCatalogue.Controllers
 {
     public class BooksController : Controller
     {
-        private readonly string apiEndpoint = "https://indramahkota-api.azurewebsites.net/api/books/";
-        //private string apiEndpoint = "https://localhost:8000/api/books/";
+        private readonly string bookEndpoint = "https://indramahkota-api.azurewebsites.net/api/books/";
+        private readonly string reviewEndpoint = "https://indramahkota-api.azurewebsites.net/api/reviews/";
+
         private readonly HttpClient _client;
 
         public BooksController()
@@ -30,7 +31,7 @@ namespace BooksCatalogue.Controllers
         // GET: Books
         public async Task<IActionResult> Index()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, apiEndpoint);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, bookEndpoint);
             HttpResponseMessage response = await _client.SendAsync(request);
 
             switch (response.StatusCode)
@@ -52,22 +53,34 @@ namespace BooksCatalogue.Controllers
                 return NotFound();
             }
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, apiEndpoint + id);
-            HttpResponseMessage response = await _client.SendAsync(request);
+            HttpRequestMessage bookRequest = new HttpRequestMessage(HttpMethod.Get, bookEndpoint + id);
+            HttpResponseMessage bookResponse = await _client.SendAsync(bookRequest);
 
-            switch (response.StatusCode)
+            HttpRequestMessage reviewRequest = new HttpRequestMessage(HttpMethod.Get, reviewEndpoint + id);
+            HttpResponseMessage reviewResponse = await _client.SendAsync(reviewRequest);
+
+            if(bookResponse.StatusCode == HttpStatusCode.OK &&
+                reviewResponse.StatusCode == HttpStatusCode.OK)
             {
-                case HttpStatusCode.OK:
-                    string responseString = await response.Content.ReadAsStringAsync();
+                string bookString = await bookResponse.Content.ReadAsStringAsync();
+                var book = JsonSerializer.Deserialize<Book>(bookString);
 
+                string reviewString = await reviewResponse.Content.ReadAsStringAsync();
+                var reviews = JsonSerializer.Deserialize<ICollection<Review>>(reviewString);
 
+                book.Reviews = reviews;
 
-
-
-                    var book = JsonSerializer.Deserialize<Book>(responseString);
-                    return View(book);
-                default:
-                    return ErrorAction("Error. Status code = " + response.StatusCode + ": " + response.ReasonPhrase);
+                return View(book);
+            }
+            else
+            {
+                if(bookResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    return ErrorAction("Error. Status code = " + bookResponse.StatusCode + "; " + bookResponse.ReasonPhrase);
+                } else
+                {
+                    return ErrorAction("Error. Status code = " + reviewResponse.StatusCode + "; " + reviewResponse.ReasonPhrase);
+                }
             }
         }
 
@@ -97,7 +110,7 @@ namespace BooksCatalogue.Controllers
                     { new StreamContent(image.OpenReadStream(), (int)image.Length), "coverURL", image.FileName }
                 };
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, apiEndpoint)
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, bookEndpoint)
                 {
                     Content = content
                 };
@@ -127,7 +140,7 @@ namespace BooksCatalogue.Controllers
                 return NotFound();
             }
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, apiEndpoint + id);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, bookEndpoint + id);
             HttpResponseMessage response = await _client.SendAsync(request);
 
             switch (response.StatusCode)
@@ -165,7 +178,7 @@ namespace BooksCatalogue.Controllers
                 };
 
                 HttpContent content = new FormUrlEncodedContent(httpContent);
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, apiEndpoint + id)
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, bookEndpoint + id)
                 {
                     Content = content
                 };
@@ -194,7 +207,7 @@ namespace BooksCatalogue.Controllers
                 return NotFound();
             }
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, apiEndpoint + id);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, bookEndpoint + id);
             HttpResponseMessage response = await _client.SendAsync(request);
 
             switch (response.StatusCode)
@@ -213,7 +226,7 @@ namespace BooksCatalogue.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, apiEndpoint + id);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, bookEndpoint + id);
             HttpResponseMessage response = await _client.SendAsync(request);
 
             switch (response.StatusCode)
