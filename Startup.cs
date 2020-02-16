@@ -1,3 +1,4 @@
+using BooksCatalogue.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ namespace BooksCatalogue
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.Configure<AzureSearchService>(Configuration.GetSection("AzureSearchService"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,7 +49,7 @@ namespace BooksCatalogue
                     name: "default",
                     //pattern: "{controller=Books}/{action=Welcome}/{name=Rick}/{numtimes=40}");
                     //pattern: "{controller=Review}/{action=Index}/{id?}");
-                    pattern: "{controller=Home}/{action=RedisCache}/{id?}");
+                    pattern: "{controller=Books}/{action=Index}/{id?}");
             });
         }
     }

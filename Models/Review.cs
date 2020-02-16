@@ -11,7 +11,8 @@ namespace BooksCatalogue.Models
 
         [JsonPropertyName("bookId")]
         public int BookId { get; set; }
-        
+
+        [Display(Name = "Reviewer Name")]
         [JsonPropertyName("reviewerName")]
         public string ReviewerName { get; set; }
         
