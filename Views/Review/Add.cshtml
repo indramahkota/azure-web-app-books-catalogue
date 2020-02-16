@@ -29,14 +29,15 @@
                 <span asp-validation-for="Comment" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="AddReview" class="btn btn-primary" />
+                <input type="submit" value="Add Review" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <!--<a asp-action="Details">Back to List</a>-->
+    @Html.ActionLink("Back to List", "Details", "Books", new { id = ViewData["BookId"] }, null)
 </div>
 
 @section Scripts {

@@ -85,5 +85,16 @@ namespace BooksCatalogue.Controllers
         {
             return new RedirectResult("/Home/Error?message=" + message);
         }
+
+        public ActionResult Details([Bind("BookId")]int? bookId)
+        {
+            if (bookId == null)
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction("Details", new RouteValueDictionary(
+                            new { controller = "Books", action = "Details", Id = bookId }));
+        }
     }
 }
