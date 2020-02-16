@@ -272,10 +272,32 @@ namespace BooksCatalogue.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, bookEndpoint + id);
-            HttpResponseMessage response = await _client.SendAsync(request);
+            HttpRequestMessage deleteReviewRequest = new HttpRequestMessage(HttpMethod.Delete, reviewEndpoint + id);
+            HttpResponseMessage deleteReviewResponse = await _client.SendAsync(deleteReviewRequest);
 
-            switch (response.StatusCode)
+            if(deleteReviewResponse.StatusCode == HttpStatusCode.NoContent ||
+                deleteReviewResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                HttpRequestMessage deleteBookRequest = new HttpRequestMessage(HttpMethod.Delete, bookEndpoint + id);
+                HttpResponseMessage deleteBookResponse = await _client.SendAsync(deleteBookRequest);
+
+                switch (deleteBookResponse.StatusCode)
+                {
+                    case HttpStatusCode.OK:
+                    case HttpStatusCode.NoContent:
+                        return RedirectToAction(nameof(Index));
+                    case HttpStatusCode.Unauthorized:
+                        return ErrorAction("Please sign in again. " + deleteBookResponse.ReasonPhrase);
+                    default:
+                        return ErrorAction("Error. Status code = " + deleteBookResponse.StatusCode);
+                }
+
+            } else
+            {
+                return ErrorAction("Error. Status code = " + deleteReviewResponse.StatusCode);
+            }
+
+            /*switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
                 case HttpStatusCode.NoContent:
@@ -284,7 +306,7 @@ namespace BooksCatalogue.Controllers
                     return ErrorAction("Please sign in again. " + response.ReasonPhrase);
                 default:
                     return ErrorAction("Error. Status code = " + response.StatusCode);
-            }
+            }*/
         }
 
         private bool IsImage(IFormFile file)
