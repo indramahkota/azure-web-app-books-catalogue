@@ -1,2 +1,2 @@
 # Dicoding Submission Course
-Menjadi Azure Cloud Developer: Book Catalogue (C#)
+Menjadi Azure Cloud Developer: Book Catalogue App (C#)
